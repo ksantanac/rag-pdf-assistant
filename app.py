@@ -78,24 +78,33 @@ if caminhos:
         Você é um assistente especializado em responder perguntas com base nos documentos fornecidos.
 
         Instruções:
-        - Use apenas o contexto abaixo para responder.
-        - Se a resposta não estiver clara no contexto, diga: "Não encontrei essa informação nos documentos."
-        - Seja direto e conciso (máximo 3 frases).
-        - Se possível, destaque palavras-chave importantes da resposta.
-        - Não invente informações que não estejam no contexto.
+        - Use prioritariamente o **contexto** abaixo para formular a resposta.
+        - Se não houver informação clara no contexto, mas houver algo **parcialmente relacionado**, use-o e deixe explícito ("Com base no que encontrei...").
+        - Só responda "Não encontrei essa informação nos documentos." se realmente não houver nada relevante.
+        - Responda de forma clara, objetiva e curta (até 3 frases).
+        - Destaque palavras-chave importantes com **negrito**.
+        - Nunca invente informações que não estejam no contexto.
 
-        Contexto: {context}
+        Contexto:
+        {context}
 
-        Pergunta: {question}
+        Pergunta:
+        {question}
 
         Resposta:
         """
     )
 
+    retriever = vectordb.as_retriever(
+        search_type="similarity", 
+        search_kwargs={"k": 5}     
+    )
+
+
     # Criar chain
     chat_chain = RetrievalQA.from_chain_type(
         llm=chat,
-        retriever=vectordb.as_retriever(search_type="mmr"),
+        retriever=retriever,
         chain_type_kwargs={"prompt": chain_prompt},
         return_source_documents=True
     )
